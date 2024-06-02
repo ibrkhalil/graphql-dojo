@@ -103,7 +103,7 @@ const mutation = new GraphQLObjectType({
     editUser: {
       type: UserType,
       args: {
-        id: {type: notNull(GraphQLInt)},
+        id: {type: notNull(GraphQLString)},
         firstName: {type: GraphQLString},
         age: {type: GraphQLString}
       },
