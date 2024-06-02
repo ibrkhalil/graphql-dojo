@@ -3,6 +3,8 @@ const graphql = require("graphql");
 
 const { GraphQLObjectType, GraphQLInt, GraphQLString, GraphQLList } = graphql;
 
+const notNull = (type) => new graphql.GraphQLNonNull(type)
+
 const CompanyType = new GraphQLObjectType({
   name: "Company",
   // Closure that'll be only ran after the rest of the file
@@ -71,6 +73,49 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+const mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    // Field in a mutation describes
+    // What the mutation is doing
+    addUser: {
+      type: UserType,
+      args: {
+        firstName: {type: notNull(GraphQLString)},
+        age: {type: notNull(GraphQLInt)},
+        companyId: {type: GraphQLString}
+      },
+      resolve(_parentValue, {firstName, age}) {
+        return axios.post('http://localhost:3000/users', {firstName, age})
+        .then(r => r.data);
+      }
+    },
+    deleteUser: {
+      type: UserType,
+      args: {
+        id: {type: notNull(GraphQLInt)},
+      },
+      resolve(_parentValue, {id}) {
+        return axios.delete(`http://localhost:3000/users/${id}`)
+        .then(r => r.data);
+      }
+    },
+    editUser: {
+      type: UserType,
+      args: {
+        id: {type: notNull(GraphQLInt)},
+        firstName: {type: GraphQLString},
+        age: {type: GraphQLString}
+      },
+      resolve(_parentValue, {firstName, age, id}) {
+        return axios.patch(`http://localhost:3000/users/${id}`, {firstName, age})
+        .then(r => r.data);
+      }
+    }
+  },
+})
+
 module.exports = new graphql.GraphQLSchema({
   query: RootQuery,
+  mutation
 });
